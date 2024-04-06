@@ -59,11 +59,9 @@
 
 (defconst nyan-cat-size 3)
 
-(defconst nyan-cat-face-image (concat nyan-directory "img/nyan.xpm"))
-(defconst nyan-rainbow-image (concat nyan-directory "img/rainbow.xpm"))
-(defconst nyan-outerspace-image (concat nyan-directory "img/outerspace.xpm"))
-
-(defconst nyan-music (concat nyan-directory "mus/nyanlooped.mp3"))
+(defconst nyan-cat-face-image (concat nyan-directory "img/nyan.png"))
+(defconst nyan-rainbow-image (concat nyan-directory "img/rainbow.png"))
+(defconst nyan-outerspace-image (concat nyan-directory "img/outerspace.png"))
 
 (defconst nyan-modeline-help-string "Nyanyanya!\nmouse-1: Scroll buffer position")
 
@@ -161,13 +159,13 @@ This can be t or nil."
   :group 'nyan)
 
 ;;; Load images of Nyan Cat an it's rainbow.
-(defvar nyan-cat-image (if (image-type-available-p 'xpm)
-                           (create-image nyan-cat-face-image 'xpm nil :ascent 'center)))
+(defvar nyan-cat-image (if (image-type-available-p 'png)
+                           (create-image nyan-cat-face-image 'png nil :ascent 'center)))
 
-(defvar nyan-animation-frames (if (image-type-available-p 'xpm)
+(defvar nyan-animation-frames (if (image-type-available-p 'png)
                                   (mapcar (lambda (id)
-                                            (create-image (concat nyan-directory (format "img/nyan-frame-%d.xpm" id))
-                                                          'xpm nil :ascent 95))
+                                            (create-image (concat nyan-directory (format "img/nyan-frame-%d.png" id))
+                                                          'png nil :ascent 95))
                                           '(1 2 3 4 5 6))))
 (defvar nyan-current-frame 0)
 
@@ -249,7 +247,7 @@ This can be t or nil."
     (let* ((rainbows (nyan-number-of-rainbows))
            (outerspaces (- nyan-bar-length rainbows nyan-cat-size))
            (rainbow-string "")
-           (xpm-support (image-type-available-p 'xpm))
+           (png-support (image-type-available-p 'png))
            (nyancat-string (propertize
                             (aref (nyan-catface) (nyan-catface-index))
                             'display (nyan-get-anim-frame)))
@@ -258,9 +256,9 @@ This can be t or nil."
       (dotimes (number rainbows)
         (setq rainbow-string (concat rainbow-string
                                      (nyan-add-scroll-handler
-                                      (if xpm-support
+                                      (if png-support
                                           (propertize "|"
-                                                      'display (create-image nyan-rainbow-image 'xpm nil :ascent (or (and nyan-wavy-trail
+                                                      'display (create-image nyan-rainbow-image 'png nil :ascent (or (and nyan-wavy-trail
                                                                                                                             (nyan-wavy-rainbow-ascent number))
                                                                                                                        (if (nyan--is-animating-p) 95 'center))))
                                         "|")
@@ -268,9 +266,9 @@ This can be t or nil."
       (dotimes (number outerspaces)
         (setq outerspace-string (concat outerspace-string
                                         (nyan-add-scroll-handler
-                                         (if xpm-support
+                                         (if png-support
                                              (propertize "-"
-                                                         'display (create-image nyan-outerspace-image 'xpm nil :ascent (if (nyan--is-animating-p) 95 'center)))
+                                                         'display (create-image nyan-outerspace-image 'png nil :ascent (if (nyan--is-animating-p) 95 'center)))
                                            "-")
                                          (/ (float (+ rainbows nyan-cat-size number)) nyan-bar-length) buffer))))
       ;; Compute Nyan Cat string.
@@ -278,27 +276,6 @@ This can be t or nil."
                           nyancat-string
                           outerspace-string)
                   'help-echo nyan-modeline-help-string))))
-
-
-;;; Music handling.
-
-;; mplayer needs to be installed for that
-(defvar nyan-music-process nil)
-
-(defun nyan-start-music ()
-  (interactive)
-  (unless nyan-music-process
-    (setq nyan-music-process (start-process-shell-command "nyan-music"
-                                                          "nyan-music"
-                                                          (concat "mplayer " nyan-music " -loop 0")))))
-
-(defun nyan-stop-music ()
-  (interactive)
-  (when nyan-music-process
-    (delete-process nyan-music-process)
-    (setq nyan-music-process nil)))
-
-
 
 ;;;###autoload
 (define-minor-mode nyan-mode
