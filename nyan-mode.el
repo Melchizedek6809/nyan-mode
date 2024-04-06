@@ -128,15 +128,8 @@ informations from small windows."
          (nyan-refresh))
   :group 'nyan)
 
-(defcustom nyan-bar-length 32
-  "Length of Nyan Cat bar in units.
-Each unit is equal to an 8px image.
-Minimum of 3 units are required for Nyan Cat."
-  :type 'integer
-  :set (lambda (sym val)
-         (set-default sym val)
-         (nyan-refresh))
-  :group 'nyan)
+(defun nyan-bar-length ()
+  (- (window-width) 80))
 
 (defcustom nyan-animate-nyancat nil
   "Enable animation for Nyan Cat.
@@ -208,7 +201,7 @@ This can be t or nil."
                          (/ (- (float (point))
                                (float (point-min)))
                             (float (point-max)))))
-               (- nyan-bar-length nyan-cat-size))
+               (- (nyan-bar-length) nyan-cat-size))
             100)))
 
 (defun nyan-catface ()
@@ -245,7 +238,7 @@ This can be t or nil."
   (if (< (window-width) nyan-minimum-window-width)
       ""                                ; disabled for too small windows
     (let* ((rainbows (nyan-number-of-rainbows))
-           (outerspaces (- nyan-bar-length rainbows nyan-cat-size))
+           (outerspaces (- (nyan-bar-length) rainbows nyan-cat-size))
            (rainbow-string "")
            (png-support (image-type-available-p 'png))
            (nyancat-string (propertize
@@ -262,7 +255,7 @@ This can be t or nil."
                                                                                                                             (nyan-wavy-rainbow-ascent number))
                                                                                                                        (if (nyan--is-animating-p) 95 'center))))
                                         "|")
-                                      (/ (float number) nyan-bar-length) buffer))))
+                                      (/ (float number) (nyan-bar-length)) buffer))))
       (dotimes (number outerspaces)
         (setq outerspace-string (concat outerspace-string
                                         (nyan-add-scroll-handler
@@ -270,7 +263,7 @@ This can be t or nil."
                                              (propertize "-"
                                                          'display (create-image nyan-outerspace-image 'png nil :ascent (if (nyan--is-animating-p) 95 'center)))
                                            "-")
-                                         (/ (float (+ rainbows nyan-cat-size number)) nyan-bar-length) buffer))))
+                                         (/ (float (+ rainbows nyan-cat-size number)) (nyan-bar-length)) buffer))))
       ;; Compute Nyan Cat string.
       (propertize (concat rainbow-string
                           nyancat-string
